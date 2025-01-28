@@ -136,15 +136,14 @@
     radius: 7
     energy: 3
 
-#Goliath Hardsuit
 - type: entity
   parent: ClothingHeadHardsuitWithLightBase
   id: ClothingHeadHelmetHardsuitGoliath
   name: goliath hardsuit helmet
-  description: A sturdy helmet designed for complex industrial operations in space.
+  de  scription: A sturdy hardsuit helmet, infused with a goliath's hide and an eerie, unblinking eye cut from its mass.
   components:
   - type: Sprite
-    sprite: Clothing/Head/Hardsuits/goliath.rsi
+    sprite: Clothing/Head/Hardsuits/goliathhelm.rsi
     layers:
     - state: icon
     - state: icon-unshaded
