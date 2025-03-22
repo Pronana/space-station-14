@@ -1,4 +1,6 @@
+using Content.Shared.Movement.Components;
 using Content.Shared.Movement.Events;
+using Content.Shared.Movement.Systems;
 using Content.Shared.Standing;
 using Content.Shared.Stunnable;
 using Robust.Shared.Physics.Events;
@@ -7,6 +9,7 @@ namespace Content.Shared.Slippery;
 
 public sealed class SlidingSystem : EntitySystem
 {
+    [Dependency] private readonly MovementSpeedModifierSystem _speedModifierSystem = default!;
     public override void Initialize()
     {
         base.Initialize();
@@ -20,9 +23,14 @@ public sealed class SlidingSystem : EntitySystem
     /// <summary>
     ///     Modify the friction by the frictionModifier stored on the component.
     /// </summary>
-    private void OnSlideAttempt(EntityUid uid, SlidingComponent component, ref TileFrictionEvent args)
+    private void OnSlideAttempt(EntityUid entity, SlidingComponent component, ref TileFrictionEvent args)
     {
         args.Modifier = component.FrictionModifier;
+        // This is purely a test to see if changing friction to MovementModifierComponent would help things,
+        // Do not leave this code in it's not a good way of doing this
+        if(!TryComp<MovementSpeedModifierComponent>(entity, out var comp))
+            return;
+        _speedModifierSystem.ChangeFriction(entity, component.FrictionModifier, component.FrictionModifier, component.FrictionModifier, comp);
     }
 
     /// <summary>
@@ -49,14 +57,16 @@ public sealed class SlidingSystem : EntitySystem
     /// <summary>
     ///     Set friction to normal when ending collision with a SuperSlippery entity.
     /// </summary>
-    private void OnEndCollide(EntityUid uid, SlidingComponent component, ref EndCollideEvent args)
+    private void OnEndCollide(EntityUid entity, SlidingComponent component, ref EndCollideEvent args)
     {
         if (!component.CollidingEntities.Remove(args.OtherEntity))
             return;
 
         if (component.CollidingEntities.Count == 0)
             component.FrictionModifier = SharedStunSystem.KnockDownModifier;
+        if(TryComp<MovementSpeedModifierComponent>(entity, out var comp))
+            _speedModifierSystem.ChangeFriction(entity, MovementSpeedModifierComponent.DefaultFriction, null, MovementSpeedModifierComponent.DefaultAcceleration, comp);
 
-        Dirty(uid, component);
+        Dirty(entity, component);
     }
 }
